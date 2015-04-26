@@ -23,6 +23,7 @@
 
 #include <GL/glx.h>
 
+#include "x11_common.h"
 #include "gl_hwdec.h"
 #include "video/vaapi.h"
 
