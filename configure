@@ -459,6 +459,7 @@ check_pkg_or_exit "dvdnav"
 check_pkg_or_exit "libbluray"
 #check_pkg_or_exit "icu-uc"
 check_pkg_or_exit "chardet"
+check_pkg_or_exit "uchardet"
 if [ $os = "linux" ]; then
     check_pkg_or_exit glib "glib-2.0" "gobject-2.0"
     check_pkg_or_exit xcb "xcb" "xcb-icccm" "xcb-screensaver" "xcb-randr" "xcb-xtest" "x11"
@@ -478,7 +479,7 @@ check_feature_one() {
     local var=$(get_feature_name)
     local pkg=$(get_option_field $f_pkg)
     local value=$(eval echo \$$var)
-    if [ -z $var ]; then continue; fi
+    if [ -z $var ]; then return; fi
     if [ $value = enable ]; then
         check_pkg_or_exit "$pkg"
     elif [ $value = autodetect ]; then
