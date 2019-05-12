@@ -41,8 +41,10 @@ public:
     virtual auto setFullScreen(bool fs) -> void;
     virtual auto isFrameless() const -> bool;
     virtual auto setFrameless(bool frameless) -> void;
-    virtual auto isAlwaysOnTop() const -> bool = 0;
-    virtual auto setAlwaysOnTop(bool onTop) -> void = 0;
+    virtual auto isAlwaysOnTop() const -> bool
+                { return m_window->flags() & Qt::WindowStaysOnTopHint; };
+    virtual auto setAlwaysOnTop(bool onTop) -> void
+                { m_window->setFlag(Qt::WindowStaysOnTopHint, onTop); };
     virtual auto startMoveByDrag(const QPointF &m) -> void;
     virtual auto moveByDrag(const QPointF &m) -> void;
     virtual auto endMoveByDrag() -> void;
