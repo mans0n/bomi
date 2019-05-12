@@ -35,7 +35,7 @@ static const QStringList audioExts = {
 };
 
 static const QStringList subExts = {
-    u"ass"_q, u"smi"_q, u"srt"_q, u"ssa"_q, u"sub"_q, u"txt"_q
+    u"ass"_q, u"smi"_q, u"srt"_q, u"ssa"_q, u"sub"_q, u"txt"_q, u"sup"_q
 };
 
 static const QStringList plExts = { u"cue"_q, u"pls"_q, u"m3u"_q, u"m3u8"_q };
