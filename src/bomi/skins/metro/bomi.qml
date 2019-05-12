@@ -137,7 +137,7 @@ B.AppWithDock {
                 MetroButton { prefix: "next"; action: "play/next" }
                 Item {
                     height: 30; Layout.fillWidth: true
-                    anchors.verticalCenter: parent.verticalCenter
+                    Layout.alignment: Qt.AlignVCenter
                     MouseArea {
                         id: volumeArea
                         width: volume.width; height: 30

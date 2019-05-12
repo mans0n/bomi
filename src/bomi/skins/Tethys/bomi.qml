@@ -259,13 +259,13 @@ B.AppWithDock {
                 anchors.rightMargin: anchors.leftMargin
                 Loader {
                     readonly property int bigSize: 32
-                    anchors.verticalCenter: parent.verticalCenter
+                    Layout.alignment: Qt.AlignVCenter
                     sourceComponent: mediaButtonComponent
                 }
                 B.TimeDuration {
                     id: td; spacing: 2
                     height: parent.height; width: contentWidth
-                    anchors.verticalCenter: parent.verticalCenter
+                    Layout.alignment: Qt.AlignVCenter
                     textStyle {
                         color: "white"; style: Text.Raised; styleColor: "black"
                         font.pixelSize: 9;
@@ -277,7 +277,7 @@ B.AppWithDock {
 
                 Loader {
                     readonly property var timeDuration: td
-                    anchors.verticalCenter: parent.verticalCenter
+                    Layout.alignment: Qt.AlignVCenter
                     width: 100; height: 14
                     sourceComponent: timeslider
                     Layout.fillWidth: true
@@ -285,13 +285,13 @@ B.AppWithDock {
 
                 Loader {
                     sourceComponent: volumeIcon
-                    anchors.verticalCenter: parent.verticalCenter
+                    Layout.alignment: Qt.AlignVCenter
                 }
 
                 B.VolumeSlider {
                     id: volumeCompact; style: sliders
                     width: 70; height: 14
-                    anchors.verticalCenter: parent.verticalCenter
+                    Layout.alignment: Qt.AlignVCenter
                     visible: app.width > 500
                 }
 
