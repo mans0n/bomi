@@ -131,7 +131,7 @@ struct MainWindow::Data {
     OS::WindowAdapter *adapter = nullptr;
     JrServer *jrServer = nullptr;
     JrPlayer jrPlayer;
-    Qt::WindowState prevWindowState = Qt::WindowNoState;
+    Qt::WindowStates prevWindowState = Qt::WindowNoState;
     int wheelAngles = 0;
 
     auto fileNameGenerator(const QTime &end = QTime()) const -> FileNameGenerator;
@@ -200,7 +200,7 @@ struct MainWindow::Data {
     auto openDir(const QString &dir = QString()) -> void;
     auto screenSize() const -> QSize;
     auto updateWaitingMessage() -> void;
-    auto updateWindowState(Qt::WindowState ws) -> void;
+    auto updateWindowState(Qt::WindowStates ws) -> void;
 
     template<class T, class Func>
     auto push(const T &to, const T &from, const Func &func) -> QUndoCommand*;

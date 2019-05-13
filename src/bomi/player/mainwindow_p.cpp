@@ -886,13 +886,13 @@ auto MainWindow::Data::doVisibleAction(bool visible) -> void
     }
 }
 
-auto MainWindow::Data::updateWindowState(Qt::WindowState ws) -> void
+auto MainWindow::Data::updateWindowState(Qt::WindowStates ws) -> void
 {
     p->setFilePath(filePath);
     adapter->endMoveByDrag();
     readyToHideCursor();
     auto changed = [&] (Qt::WindowState state) -> bool
-        { return !(prevWindowState & state) != !(ws & state); };
+                   { return (prevWindowState ^ ws) & state; };
     if (!stateChanging && changed(Qt::WindowMinimized))
         doVisibleAction(ws != Qt::WindowMinimized);
     const bool fsChanged = changed(Qt::WindowFullScreen);

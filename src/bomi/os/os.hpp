@@ -62,8 +62,8 @@ public:
                   Qt::Edges edges = Qt::TopEdge | Qt::BottomEdge
                     | Qt::RightEdge | Qt::LeftEdge,
                   int threshold = 10) const -> QPoint;
-    auto state() const -> Qt::WindowState { return m_state; }
-    auto oldState() const -> Qt::WindowState { return m_oldState; }
+    auto state() const -> Qt::WindowStates
+                { return m_window->windowStates(); }
     auto positionArea(const QRect &rect, const QSize &size) const -> QRect;
     auto frameMargins() const -> QMargins
         { return isFrameVisible() ? m_window->frameMargins() : QMargins(); }
@@ -77,18 +77,18 @@ public:
     auto winId() const -> WId { return m_window->winId(); }
     auto window() const -> QWindow* { return m_window; }
 signals:
-    void stateChanged(Qt::WindowState state, Qt::WindowState old);
+    void stateChanged(Qt::WindowStates state);
 protected:
     WindowAdapter(QWindow *parent);
     auto setMovingByDrag(bool moving) { m_moving = moving; }
-    auto setState(Qt::WindowState ws) -> void;
+    auto setState(Qt::WindowStates ws) -> void;
     auto setFramelessHint(bool frameless) -> void;
     auto setFullScreenHint(bool fs) -> void;
 private:
     QWindow *m_window = nullptr;
     bool m_started = false, m_moving = false;
     QPoint m_winStartPos, m_mouseStartPos;
-    Qt::WindowState m_state = Qt::WindowNoState, m_oldState = Qt::WindowNoState;
+    Qt::WindowStates m_state = Qt::WindowNoState;
 };
 
 auto adapter(QWindow *w) -> WindowAdapter*;

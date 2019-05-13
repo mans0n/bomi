@@ -180,12 +180,16 @@ auto WindowAdapter::setFramelessHint(bool frameless) -> void
 
 auto WindowAdapter::setFullScreenHint(bool fs) -> void
 {
-    m_window->setWindowState(fs ? Qt::WindowFullScreen : m_oldState);
+    Qt::WindowStates state = m_window->windowStates();
+    if (fs)
+        m_window->setWindowStates(state | Qt::WindowFullScreen);
+    else
+        m_window->setWindowStates(state & ~Qt::WindowFullScreen);
 }
 
 auto WindowAdapter::isFullScreen() const -> bool
 {
-    return m_window->windowState() & Qt::WindowFullScreen;
+    return m_window->windowStates() & Qt::WindowFullScreen;
 }
 
 auto WindowAdapter::setFullScreen(bool fs) -> void
@@ -196,12 +200,11 @@ auto WindowAdapter::setFullScreen(bool fs) -> void
         m_window->setVisible(true);
 }
 
-auto WindowAdapter::setState(Qt::WindowState ws) -> void
+auto WindowAdapter::setState(Qt::WindowStates ws) -> void
 {
     if (m_state != ws) {
-        m_oldState = m_state;
         m_state = ws;
-        emit stateChanged(m_state, m_oldState);
+        emit stateChanged(m_state);
     }
 }
 
