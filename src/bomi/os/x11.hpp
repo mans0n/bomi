@@ -62,6 +62,7 @@ public:
 private:
     auto stopDrag() -> void;
     QTimer m_timer;
+    bool isStaysOnTopSupported;
 };
 
 class HwAccX11 : public HwAcc {

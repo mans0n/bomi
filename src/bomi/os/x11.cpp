@@ -59,6 +59,7 @@ enum XcbAtom {
     _NET_WM_STATE_DEMANDS_ATTENTION,
     _NET_WM_STATE_STAYS_ON_TOP,
     _NET_WM_MOVERESIZE,
+    _NET_SUPPORTED,
     XcbAtomEnd,
     XcbAtomBegin = _NET_WM_STATE
 };
@@ -78,9 +79,14 @@ enum class ScreensaverMethod {
     Auto, Gnome, Freedesktop, Xss
 };
 
+template<class T>
+static inline QSharedPointer<T> _Reply(T *t) { return QSharedPointer<T>(t, free); }
+
 struct X11 : public QObject {
     X11();
     ~X11();
+
+    auto isStaysOnTopSupported() const -> bool;
 
     struct {
         QTimer reset;
@@ -163,6 +169,7 @@ X11::X11()
     GET_ATOM(_NET_WM_STATE_DEMANDS_ATTENTION);
     GET_ATOM(_NET_WM_STATE_STAYS_ON_TOP);
     GET_ATOM(_NET_WM_MOVERESIZE);
+    GET_ATOM(_NET_SUPPORTED);
 #undef GET_ATOM
 
     ss.reset.setInterval(20000);
@@ -205,10 +212,32 @@ X11::~X11()
     ::close(statm);
 }
 
+auto X11::isStaysOnTopSupported() const -> bool
+{
+    const auto cookie = xcb_get_property_unchecked(connection, 0, root,
+                                                   atoms[_NET_SUPPORTED],
+                                                   XCB_ATOM_ATOM, 0, 1024);
+    auto reply = _Reply(xcb_get_property_reply(connection, cookie, nullptr));
+    if (!reply || reply->format != 32 || reply->type != XCB_ATOM_ATOM) {
+        _Debug("Reply for _NET_SUPPORTED: %% (format %% type %%)",
+               reply, reply->format, reply->type);
+        return false;
+    }
+    auto begin = static_cast<const xcb_atom_t *>(xcb_get_property_value(reply.data()));
+    auto end = begin + reply->length;
+    if (std::find(begin, end, atoms[_NET_WM_STATE_STAYS_ON_TOP]) != end) {
+        _Debug("_NET_WM_STATE_STAYS_ON_TOP supported");
+        return true;
+    }
+    if (std::find(begin, end, atoms[_NET_WM_STATE_ABOVE]) != end) {
+        _Debug("_NET_WM_STATE_ABOVE supported");
+        return true;
+    }
+    return false;
+}
+
 auto getHwAcc() -> HwAcc* { return d->api; }
 
-template<class T>
-static inline QSharedPointer<T> _Reply(T *t) { return QSharedPointer<T>(t, free); }
 
 auto refreshRate() -> qreal
 {
@@ -392,6 +421,7 @@ X11WindowAdapter::X11WindowAdapter(QWindow* w)
             stopDrag();
     });
     m_timer.setInterval(10);
+    isStaysOnTopSupported = d->isStaysOnTopSupported();
 }
 
 auto X11WindowAdapter::setFullScreen(bool fs) -> void
@@ -451,6 +481,7 @@ auto X11WindowAdapter::endMoveByDrag() -> void
 
 auto X11WindowAdapter::isAlwaysOnTop() const -> bool
 {
+    if (!isStaysOnTopSupported) return false;
     const auto cookie = xcb_get_property_unchecked
         (d->connection, 0, winId(), d->atoms[_NET_WM_STATE], XCB_ATOM_ATOM, 0, 1024);
     auto reply = _Reply(xcb_get_property_reply(d->connection, cookie, nullptr));
@@ -467,6 +498,7 @@ auto X11WindowAdapter::isAlwaysOnTop() const -> bool
 
 auto X11WindowAdapter::setAlwaysOnTop(bool on) -> void
 {
+    if (!isStaysOnTopSupported) return;
     d->sendState(winId(), on, _NET_WM_STATE_ABOVE, _NET_WM_STATE_STAYS_ON_TOP);
 }
 
