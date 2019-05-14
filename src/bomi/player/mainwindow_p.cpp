@@ -142,7 +142,7 @@ auto MainWindow::Data::plugEngine() -> void
         menu(u"subtitle"_q)(u"track"_q).setEnabled(running);
         menu(u"video"_q)(u"aspect"_q)[u"increase"_q]->setEnabled(running);
         menu(u"video"_q)(u"aspect"_q)[u"decrease"_q]->setEnabled(running);
-        OS::setScreensaverEnabled(!pref.disable_screensaver() || !playing);
+        OS::setScreensaverEnabled(!pref.disable_screensaver() || !playing, p);
         updateStaysOnTop();
         stateChanging = false;
     });
@@ -587,44 +587,44 @@ auto MainWindow::Data::showMessage(const QString &msg, const bool *force) -> voi
 auto MainWindow::Data::applyPref() -> void
 {
     pref.save();
-    const Pref &p = pref;
+    const Pref &prf = pref;
 
-    OS::setScreensaverMethod(p.screensaver_method());
-    const auto acc = p.sub_enc_autodetection() ? p.sub_enc_accuracy() * 1e-2 : -1;
-    EncodingInfo::setDefault(EncodingInfo::Subtitle, p.sub_enc(), acc);
+    OS::setScreensaverMethod(prf.screensaver_method(), p);
+    const auto acc = prf.sub_enc_autodetection() ? prf.sub_enc_accuracy() * 1e-2 : -1;
+    EncodingInfo::setDefault(EncodingInfo::Subtitle, prf.sub_enc(), acc);
 
-    const auto &controls = p.controls_theme();
+    const auto &controls = prf.controls_theme();
 
     e.preview()->setShowKeyframe(controls.showKeyframeForPreview);
-    youtube.setUserAgent(p.yt_user_agent());
-    youtube.setProgram(p.yt_program());
-    youtube.setPreferredFormat(p.yt_height(), p.yt_fps(), p.yt_container());
-    yle.setProgram(p.yle_program());
-    history.setRememberImage(p.remember_image());
-    history.setPropertiesToRestore(p.restore_properties());
+    youtube.setUserAgent(prf.yt_user_agent());
+    youtube.setProgram(prf.yt_program());
+    youtube.setPreferredFormat(prf.yt_height(), prf.yt_fps(), prf.yt_container());
+    yle.setProgram(prf.yle_program());
+    history.setRememberImage(prf.remember_image());
+    history.setPropertiesToRestore(prf.restore_properties());
     history.setShowMediaTitleInName(controls.showMediaTitleForLocalFilesInHistory,
                                     controls.showMediaTitleForUrlsInHistory);
     if (subFindDlg)
         subFindDlg->setOptions(pref.preserve_downloaded_subtitles(),
                                pref.preserve_file_name_format(),
                                pref.preserve_fallback_folder());
-    SubtitleParser::setMsPerCharactor(p.ms_per_char());
-    cApp.setMprisActivated(p.use_mpris2());
+    SubtitleParser::setMsPerCharactor(prf.ms_per_char());
+    cApp.setMprisActivated(prf.use_mpris2());
 
-    if (p.jr_use()) {
-        _Renew(jrServer, p.jr_connection(), p.jr_protocol());
+    if (prf.jr_use()) {
+        _Renew(jrServer, prf.jr_connection(), prf.jr_protocol());
         jrServer->setInterface(&jrPlayer);
         jrServer->setErrorHandler([=] (auto) {
             MBox::error(nullptr, tr("JSON-RPC Server Error"),
                         jrServer->errorString(), {BBox::Ok});
         });
-        jrServer->listen(p.jr_address(), p.jr_port());
+        jrServer->listen(prf.jr_address(), prf.jr_port());
     } else
         _Delete(jrServer);
 
     MouseBehavior context = MouseBehavior::NoBehavior;
     contextMenuModifier = KeyModifier::None;
-    const auto map = p.mouse_action_map();
+    const auto map = prf.mouse_action_map();
     for (auto it = map.begin(); it != map.end(); ++it) {
         for (auto iit = it->begin(); iit != it->end(); ++iit) {
             if (iit.value() != "context-menu"_a)
@@ -647,66 +647,66 @@ auto MainWindow::Data::applyPref() -> void
     }
 
     menu.retranslate();
-    menu.setShortcutMap(p.shortcut_map());
+    menu.setShortcutMap(prf.shortcut_map());
     auto &play = menu(u"play"_q);
-    play(u"speed"_q).s()->setValue(p.steps().speed_pct);
+    play(u"speed"_q).s()->setValue(prf.steps().speed_pct);
     auto &seek = play(u"seek"_q);
-    seek.s(u"seek1"_q)->setValue(p.steps().seek1_sec);
-    seek.s(u"seek2"_q)->setValue(p.steps().seek2_sec);
-    seek.s(u"seek3"_q)->setValue(p.steps().seek3_sec);
+    seek.s(u"seek1"_q)->setValue(prf.steps().seek1_sec);
+    seek.s(u"seek2"_q)->setValue(prf.steps().seek2_sec);
+    seek.s(u"seek3"_q)->setValue(prf.steps().seek3_sec);
     auto &video = menu(u"video"_q);
-    video(u"aspect"_q).s()->setValue(p.steps().aspect_ratio);
-    video(u"zoom"_q).s()->setValue(p.steps().zoom_pct);
-    video(u"move"_q).s(u"horizontal"_q)->setValue(p.steps().video_offset_pct);
-    video(u"move"_q).s(u"vertical"_q)->setValue(p.steps().video_offset_pct);
+    video(u"aspect"_q).s()->setValue(prf.steps().aspect_ratio);
+    video(u"zoom"_q).s()->setValue(prf.steps().zoom_pct);
+    video(u"move"_q).s(u"horizontal"_q)->setValue(prf.steps().video_offset_pct);
+    video(u"move"_q).s(u"vertical"_q)->setValue(prf.steps().video_offset_pct);
     auto &color = video(u"color"_q);
-    color.s(u"brightness"_q)->setValue(p.steps().color_pct);
-    color.s(u"contrast"_q)->setValue(p.steps().color_pct);
-    color.s(u"hue"_q)->setValue(p.steps().color_pct);
-    color.s(u"saturation"_q)->setValue(p.steps().color_pct);
-    color.s(u"red"_q)->setValue(p.steps().color_pct);
-    color.s(u"green"_q)->setValue(p.steps().color_pct);
-    color.s(u"blue"_q)->setValue(p.steps().color_pct);
+    color.s(u"brightness"_q)->setValue(prf.steps().color_pct);
+    color.s(u"contrast"_q)->setValue(prf.steps().color_pct);
+    color.s(u"hue"_q)->setValue(prf.steps().color_pct);
+    color.s(u"saturation"_q)->setValue(prf.steps().color_pct);
+    color.s(u"red"_q)->setValue(prf.steps().color_pct);
+    color.s(u"green"_q)->setValue(prf.steps().color_pct);
+    color.s(u"blue"_q)->setValue(prf.steps().color_pct);
     auto &audio = menu(u"audio"_q);
-    audio(u"sync"_q).s()->setValue(p.steps().audio_sync_sec);
-    audio(u"volume"_q).s()->setValue(p.steps().volume_pct);
-    audio(u"amp"_q).s()->setValue(p.steps().amp_pct);
+    audio(u"sync"_q).s()->setValue(prf.steps().audio_sync_sec);
+    audio(u"volume"_q).s()->setValue(prf.steps().volume_pct);
+    audio(u"amp"_q).s()->setValue(prf.steps().amp_pct);
     auto &sub = menu(u"subtitle"_q);
-    sub(u"position"_q).s()->setValue(p.steps().sub_pos_pct);
-    sub(u"sync"_q).s()->setValue(p.steps().sub_sync_sec);
-    sub(u"scale"_q).s()->setValue(p.steps().sub_scale_pct);
+    sub(u"position"_q).s()->setValue(prf.steps().sub_pos_pct);
+    sub(u"sync"_q).s()->setValue(prf.steps().sub_sync_sec);
+    sub(u"scale"_q).s()->setValue(prf.steps().sub_scale_pct);
 
     auto &win = menu(u"window"_q);
-    for (int i = 0; i < p.window_sizes().size(); ++i)
-        p.window_sizes()[i].fillAction(win["size"_a % _N(i)]);
+    for (int i = 0; i < prf.window_sizes().size(); ++i)
+        prf.window_sizes()[i].fillAction(win["size"_a % _N(i)]);
 
-    theme.set(p.osd_theme());
+    theme.set(prf.osd_theme());
     theme.set(controls);
     reloadSkin();
     if (tray)
-        tray->setVisible(p.enable_system_tray());
+        tray->setVisible(prf.enable_system_tray());
 
     auto cache = [&] () {
         CacheInfo cache;
-        cache.local.kb = p.cache_local_mb() * 1024.0;
-        cache.network.kb = p.cache_network_mb() * 1024.0;
-        cache.disc.kb = p.cache_disc_mb() * 1024.0;
-        cache.local.sec = p.cache_local_sec();
-        cache.network.sec = p.cache_network_sec();
-        cache.disc.sec = p.cache_disc_sec();
-        cache.local.file = p.cache_local_file();
-        cache.network.file = p.cache_network_file();
-        cache.disc.file = p.cache_disc_file();
-        cache.file_kb = p.cache_file_size_mb() * 1024.0;
-        cache.min_playback_kb = p.cache_min_playback_kb();
-        cache.min_seeking_kb = p.cache_min_seeking_kb();
-        cache.remotes = p.network_folders();
+        cache.local.kb = prf.cache_local_mb() * 1024.0;
+        cache.network.kb = prf.cache_network_mb() * 1024.0;
+        cache.disc.kb = prf.cache_disc_mb() * 1024.0;
+        cache.local.sec = prf.cache_local_sec();
+        cache.network.sec = prf.cache_network_sec();
+        cache.disc.sec = prf.cache_disc_sec();
+        cache.local.file = prf.cache_local_file();
+        cache.network.file = prf.cache_network_file();
+        cache.disc.file = prf.cache_disc_file();
+        cache.file_kb = prf.cache_file_size_mb() * 1024.0;
+        cache.min_playback_kb = prf.cache_min_playback_kb();
+        cache.min_seeking_kb = prf.cache_min_seeking_kb();
+        cache.remotes = prf.network_folders();
         return cache;
     };
     auto smb = [&] () {
         SmbAuth smb;
-        smb.setUsername(p.smb_username());
-        smb.setPassword(p.smb_password());
+        smb.setUsername(prf.smb_username());
+        smb.setPassword(prf.smb_password());
         smb.setGetAuthInfo([=] (SmbAuth *smb) -> bool {
             QMutex mutex; QWaitCondition cond;
             bool res = false;
@@ -722,26 +722,26 @@ auto MainWindow::Data::applyPref() -> void
     e.lock();
     e.preview()->setActive(controls.showPreviewOnMouseOverSeekBar);
 
-    e.setResume_locked(p.remember_stopped());
-    e.setPreciseSeeking_locked(p.precise_seeking());
+    e.setResume_locked(prf.remember_stopped());
+    e.setPreciseSeeking_locked(prf.precise_seeking());
     e.setCache_locked(cache());
     e.setSmbAuth_locked(smb());
-    e.setPriority_locked(p.audio_priority(), p.sub_priority());
-    e.setAutoloader_locked(p.audio_autoload(), p.sub_autoload_v2());
+    e.setPriority_locked(prf.audio_priority(), prf.sub_priority());
+    e.setAutoloader_locked(prf.audio_autoload(), prf.sub_autoload_v2());
 
-    e.setHwAcc_locked(p.enable_hwaccel(), p.hwaccel_codecs());
-    e.setDeintOptions_locked(p.deinterlacing());
-    e.setMotionIntrplOption_locked(p.motion_interpolation());
+    e.setHwAcc_locked(prf.enable_hwaccel(), prf.hwaccel_codecs());
+    e.setDeintOptions_locked(prf.deinterlacing());
+    e.setMotionIntrplOption_locked(prf.motion_interpolation());
 
-    e.setAudioDevice_locked(p.audio_device());
-    e.setVolumeNormalizerOption_locked(p.audio_normalizer());
-    e.setChannelLayoutMap_locked(p.channel_manipulation());
-    e.setVolumeControl_locked(p.volume_scale(), p.soft_clip());
-    e.setResyncAvWhenFilterToggled_locked(p.audio_filter_resync());
+    e.setAudioDevice_locked(prf.audio_device());
+    e.setVolumeNormalizerOption_locked(prf.audio_normalizer());
+    e.setChannelLayoutMap_locked(prf.channel_manipulation());
+    e.setVolumeControl_locked(prf.volume_scale(), prf.soft_clip());
+    e.setResyncAvWhenFilterToggled_locked(prf.audio_filter_resync());
 
-    e.setSubtitleStyle_locked(p.sub_style());
-    e.setAutoselectMode_locked(p.sub_enable_autoselect(), p.sub_autoselect(),
-                               p.sub_ext(), p.sub_prefer_external());
+    e.setSubtitleStyle_locked(prf.sub_style());
+    e.setAutoselectMode_locked(prf.sub_enable_autoselect(), prf.sub_autoselect(),
+                               prf.sub_ext(), prf.sub_prefer_external());
     e.unlock();
     e.reload();
 }

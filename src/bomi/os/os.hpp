@@ -17,8 +17,13 @@ auto unassociateFileTypes(QWindow *w, bool global) -> bool;
 auto associateFileTypes(QWindow *w, bool global, const QStringList &exts) -> bool;
 
 auto screensaverMethods() -> QStringList;
-auto setScreensaverMethod(const QString &method) -> void;
-auto setScreensaverEnabled(bool enabled) -> void;
+#ifdef Q_OS_LINUX
+auto setScreensaverMethod(const QString &method, QWindow* w) -> void;
+auto setScreensaverEnabled(bool enabled, QWindow* w) -> void;
+#else
+auto setScreensaverMethod(const QString &method, QWindow* w = nullptr) -> void;
+auto setScreensaverEnabled(bool enabled, QWindow* w = nullptr) -> void;
+#endif
 
 auto shutdown() -> bool;
 auto canShutdown() -> bool;

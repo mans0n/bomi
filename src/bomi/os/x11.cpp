@@ -76,7 +76,7 @@ static auto getAtom(xcb_connection_t *conn, const char *name) -> xcb_atom_t
 }
 
 enum class ScreensaverMethod {
-    Auto, Gnome, Freedesktop, Xss
+    Auto, Gnome, Freedesktop, XDG
 };
 
 template<class T>
@@ -89,7 +89,6 @@ struct X11 : public QObject {
     auto isStaysOnTopSupported() const -> bool;
 
     struct {
-        QTimer reset;
         QDBusInterface *iface = nullptr;
         QDBusReply<uint> reply;
         bool inhibit = false;
@@ -171,14 +170,6 @@ X11::X11()
     GET_ATOM(_NET_WM_MOVERESIZE);
     GET_ATOM(_NET_SUPPORTED);
 #undef GET_ATOM
-
-    ss.reset.setInterval(20000);
-    connect(&ss.reset, &QTimer::timeout, this, [=] () {
-        Q_ASSERT(ss.method == ScreensaverMethod::Xss);
-        _Debug("Force XCB_SCREEN_SAVER_RESET.");
-        xcb_force_screen_saver(connection, XCB_SCREEN_SAVER_RESET);
-        xcb_flush(connection);
-    });
 
 #if HAVE_VAAPI && HAVE_VDPAU
     api = new VaApiInfo;
@@ -283,8 +274,8 @@ static auto methodName(ScreensaverMethod method) -> QString
         return u"org.gnome.SessionManager.Inhibit"_q;
     case ScreensaverMethod::Freedesktop:
         return u"org.freedesktop.ScreenSaver.Inhibit"_q;
-    case ScreensaverMethod::Xss:
-        return u"XScreenSaver"_q;
+    case ScreensaverMethod::XDG:
+        return u"xdg-screensaver"_q;
     default:
         return u"auto"_q;
     }
@@ -296,22 +287,21 @@ static auto methodFromName(const QString &name) -> ScreensaverMethod
         return ScreensaverMethod::Gnome;
     else if (name == "org.freedesktop.ScreenSaver.Inhibit"_a)
         return ScreensaverMethod::Freedesktop;
-    else if (name == "XScreenSaver"_a)
-        return ScreensaverMethod::Xss;
+    else if (name == "xdg-screensaver"_a)
+        return ScreensaverMethod::XDG;
     return ScreensaverMethod::Auto;
 }
 
-auto setScreensaverMethod(const QString &name) -> void
+auto setScreensaverMethod(const QString &name, QWindow *w) -> void
 {
     bool was = d->ss.inhibit;
     if (was)
-        setScreensaverEnabled(true);
+        setScreensaverEnabled(true, w);
     if (_Change(d->ss.method, methodFromName(name))) {
         _Delete(d->ss.iface);
-        d->ss.reset.stop();
     }
     if (was)
-        setScreensaverEnabled(false);
+        setScreensaverEnabled(false, w);
 }
 
 auto screensaverMethods() -> QStringList
@@ -320,20 +310,18 @@ auto screensaverMethods() -> QStringList
         u"auto"_q,
         u"org.gnome.SessionManager.Inhibit"_q,
         u"org.freedesktop.ScreenSaver.Inhibit"_q,
-        u"XScreenSaver"_q
+        u"xdg-screensaver"_q
     };
 }
 
-auto setScreensaverEnabled(bool enabled) -> void
+auto setScreensaverEnabled(bool enabled, QWindow* w) -> void
 {
     const auto disabled = !enabled;
     auto &s = d->ss;
     if (s.inhibit == disabled)
         return;
 
-    s.reset.stop();
-
-    if (!s.iface && s.method != ScreensaverMethod::Xss) {
+    if (!s.iface && s.method != ScreensaverMethod::XDG) {
         auto getGnome = [&] () {
             _Renew(s.iface, u"org.gnome.SessionManager"_q,
                  u"/org/gnome/SessionManager"_q, u"org.gnome.SessionManager"_q);
@@ -349,7 +337,7 @@ auto setScreensaverEnabled(bool enabled) -> void
                 return getGnome()->isValid();
             if (s.method == ScreensaverMethod::Freedesktop)
                 return getFreedesktop()->isValid();
-            if (s.method == ScreensaverMethod::Xss)
+            if (s.method == ScreensaverMethod::XDG)
                 return false;
             if (getGnome()->isValid()) {
                 s.method = ScreensaverMethod::Gnome;
@@ -363,7 +351,7 @@ auto setScreensaverEnabled(bool enabled) -> void
         }();
         if (!dbus) {
             _Delete(s.iface);
-            s.method = ScreensaverMethod::Xss;
+            s.method = ScreensaverMethod::XDG;
         }
         _Info("Selected screensaver method: %%", methodName(s.method));
     }
@@ -380,16 +368,19 @@ auto setScreensaverEnabled(bool enabled) -> void
             if (!s.reply.isValid()) {
                 _Error("DBus '%%' error: %%", s.iface->interface(),
                        s.reply.error().message());
-                _Error("Fallback to XCB_SCREEN_SAVER_RESET.");
+                _Error("Fallback to xdg-screensaver.");
                 _Delete(s.iface);
-                s.method = ScreensaverMethod::Xss;
+                s.method = ScreensaverMethod::XDG;
             } else
                 _Debug("Disable screensaver with '%%'.", s.iface->interface());
         }
-        if (s.method == ScreensaverMethod::Xss) {
-            xcb_screensaver_suspend(d->connection, 1);
-            _Debug("Disable screensaver with XScreenSaver.");
-            s.reset.start();
+        if (s.method == ScreensaverMethod::XDG) {
+            QProcess process;
+            process.start("xdg-screensaver"_a,
+                          QStringList() << "suspend"_a << _N(w->winId()));
+            process.waitForFinished();
+            _Debug("Disable screensaver with xdg-screensaver. %%",
+                   w->winId());
         }
     } else {
         if (s.iface) {
@@ -401,9 +392,13 @@ auto setScreensaverEnabled(bool enabled) -> void
             else
                 _Debug("Enable screensaver with '%%'.", s.iface->interface());
         }
-        if (s.method == ScreensaverMethod::Xss) {
-            xcb_screensaver_suspend(d->connection, 0);
-            _Debug("Enable screensaver with XScreenSaver.");
+        if (s.method == ScreensaverMethod::XDG) {
+            QProcess process;
+            process.start("xdg-screensaver"_a,
+                          QStringList() << "resume"_a << _N(w->winId()));
+            process.waitForFinished();
+            _Debug("Enable screensaver with xdg-screensaver: %%",
+                   w->winId());
         }
     }
     s.inhibit = disabled;

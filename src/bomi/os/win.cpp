@@ -476,7 +476,7 @@ auto createAdapter(QWindow *w) -> WindowAdapter*
     return new WinWindowAdapter(w);
 }
 
-auto setScreensaverEnabled(bool enabled) -> void
+auto setScreensaverEnabled(bool enabled, QWindow* w) -> void
 {
     const bool disabled = d->executionState & ES_DISPLAY_REQUIRED;
     if (disabled == !enabled)

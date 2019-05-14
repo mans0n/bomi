@@ -24,7 +24,7 @@ auto defaultFixedFont() -> QFont
 
 #ifndef Q_OS_LINUX
 auto screensaverMethods() -> QStringList { return { u"auto"_q }; }
-auto setScreensaverMethod(const QString &) -> void { }
+auto setScreensaverMethod(const QString &, QWindow*) -> void { }
 #endif
 
 auto getHwAcc() -> HwAcc*;
