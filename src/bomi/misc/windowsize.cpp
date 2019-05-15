@@ -101,7 +101,8 @@ auto WindowSizeWidget::values() const -> QList<WindowSize>
     QList<WindowSize> values; values.reserve(s_count);
     for (int i = 0; i < s_count; ++i) {
         auto &w = d->widgets[i];
-        values.push_back({ w.base->currentIndex(), w.percent->value() * 1e-2 });
+        values.push_back({ static_cast<bool>(w.base->currentIndex()),
+                           w.percent->value() * 1e-2 });
     }
     Q_ASSERT(values.size() == s_count);
     return values;
