@@ -135,7 +135,8 @@ PrefDialog::PrefDialog(QWidget *parent)
     addPage(tr("Mouse actions"), d->ui.ui_mouse, u":/img/input-mouse-32.png"_q);
     addPage(tr("Control step"), d->ui.ui_step, u":/img/run-build-32.png"_q);
 
-    d->ui.app_fixed_font->setFixedFontOnly(true);
+    d->ui.app_font->setFontFilters(QFontComboBox::ProportionalFonts);
+    d->ui.app_fixed_font->setFontFilters(QFontComboBox::MonospacedFonts);
     d->ui.enable_hwaccel->setEnabled(OS::hwAcc()->isAvailable());
     d->ui.screensaver_method->addItems(OS::screensaverMethods());
     d->ui.screensaver_method->setVisible(d->ui.screensaver_method->count() > 1);

@@ -1678,7 +1678,7 @@
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="FontComboBox" name="app_font">
+             <widget class="QFontComboBox" name="app_font">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -1695,7 +1695,7 @@
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="FontComboBox" name="app_fixed_font">
+             <widget class="QFontComboBox" name="app_fixed_font">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -2097,11 +2097,6 @@ You don't need to specify to this if geust is allowed.</string>
    <extends>QWidget</extends>
    <header>widget/colorselectwidget.hpp</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>FontComboBox</class>
-   <extends>QComboBox</extends>
-   <header>widget/fontcombobox.hpp</header>
   </customwidget>
   <customwidget>
    <class>OsdStyleWidget</class>

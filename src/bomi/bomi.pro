@@ -280,7 +280,6 @@ HEADERS += \
     misc/stepinfo.hpp \
     player/mrlstate_old.hpp \
     misc/smbauth.hpp \
-    widget/fontcombobox.hpp \
     json/jrserver.hpp \
     json/jrclient.hpp \
     json/jrcommon.hpp \
@@ -498,7 +497,6 @@ SOURCES += \
     misc/stepinfo.cpp \
     player/mrlstate_old.cpp \
     misc/smbauth.cpp \
-    widget/fontcombobox.cpp \
     json/jrserver.cpp \
     json/jrclient.cpp \
     json/jrcommon.cpp \
