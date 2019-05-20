@@ -344,8 +344,11 @@ auto App::executeToQuit() -> bool
     };
     if (isSet(LineCmd::DumpApiTree))
         AppObject::dumpInfo();
-    if (isSet(LineCmd::DumpActionList))
+    if (isSet(LineCmd::DumpActionList)) {
+        setLocale(Locale::c());
         RootMenu::dumpInfo();
+        setLocale(d->locale);
+    }
 #ifdef Q_OS_WIN
     if (isSet(LineCmd::WinAssoc))
         OS::associateFileTypes(nullptr, true, d->parser->value(LineCmd::WinAssoc).split(','_q));
