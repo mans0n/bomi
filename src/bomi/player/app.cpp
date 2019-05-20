@@ -266,9 +266,12 @@ App::App(int &argc, char **argv)
     d->gldebug = d->parser->isSet(LineCmd::Debug);
     const auto lvStdOut = d->parser->stdoutLogLevel();
 
-    OS::initialize();
-
     d->import();
+
+    auto logOption = d->logOption;
+    if (logOption.level(LogOutput::StdOut) < lvStdOut)
+        logOption.setLevel(LogOutput::StdOut, lvStdOut);
+    Log::setOption(logOption);
 
     d->storage.setObject(this, u"application"_q);
     d->storage.add("locale", &d->locale);
@@ -280,12 +283,9 @@ App::App(int &argc, char **argv)
     d->storage.add("fixedFont");
     d->storage.restore();
 
-    setLocale(d->locale);
+    OS::initialize();
 
-    auto logOption = d->logOption;
-    if (logOption.level(LogOutput::StdOut) < lvStdOut)
-        logOption.setLevel(LogOutput::StdOut, lvStdOut);
-    Log::setOption(logOption);
+    setLocale(d->locale);
 
     setQuitOnLastWindowClosed(false);
 #ifndef Q_OS_MAC
