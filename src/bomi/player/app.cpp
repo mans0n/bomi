@@ -234,8 +234,6 @@ App::App(int &argc, char **argv)
     setlocale(LC_NUMERIC,"C");
 #endif
 
-    OS::initialize();
-
     _New(d->parser);
     d->parser->addOption(LineCmd::Open, u"open"_q,
                          u"Open given %1 for file path or URL."_q, u"mrl"_q);
@@ -267,6 +265,8 @@ App::App(int &argc, char **argv)
     d->parser->parse(arguments());
     d->gldebug = d->parser->isSet(LineCmd::Debug);
     const auto lvStdOut = d->parser->stdoutLogLevel();
+
+    OS::initialize();
 
     d->import();
 
