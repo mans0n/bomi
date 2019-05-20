@@ -71,8 +71,8 @@ public:
         put(LineCmd::Wake);
         if (put(LineCmd::SetSubtitle))
             args.push_back(QFileInfo(value(LineCmd::SetSubtitle)).absoluteFilePath());
-        if (put(LineCmd::AddSubtitle))
-            args.push_back(QFileInfo(value(LineCmd::AddSubtitle)).absoluteFilePath());
+        // if (put(LineCmd::AddSubtitle))
+        //     args.push_back(QFileInfo(value(LineCmd::AddSubtitle)).absoluteFilePath());
         if (put(LineCmd::Action))
             args.push_back(value(LineCmd::Action));
         const auto mrl = this->mrl();
@@ -346,12 +346,14 @@ auto App::executeToQuit() -> bool
         AppObject::dumpInfo();
     if (isSet(LineCmd::DumpActionList))
         RootMenu::dumpInfo();
+#ifdef Q_OS_WIN
     if (isSet(LineCmd::WinAssoc))
         OS::associateFileTypes(nullptr, true, d->parser->value(LineCmd::WinAssoc).split(','_q));
     if (isSet(LineCmd::WinAssocDefault))
         OS::associateFileTypes(nullptr, true, _CommonExtList(VideoExt | AudioExt));
     if (isSet(LineCmd::WinUnassoc))
         OS::unassociateFileTypes(nullptr, true);
+#endif
     if (isUnique() && sendMessage(CommandLine, d->parser->toJson())) {
         done = true;
         _Info("Another instance of bomi is already running. Exit this...");
