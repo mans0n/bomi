@@ -213,7 +213,7 @@ B.AppWithDock {
 
                         Connections {
                             target: engine
-                            onVolumeChanged: {
+                            function onVolumeChanged() {
                                 volumeArea.changing = true
                                 volumeTimer.stop(); volumeTimer.start()
                             }

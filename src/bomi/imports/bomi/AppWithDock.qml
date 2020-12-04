@@ -66,7 +66,7 @@ BaseApp {
 
     Connections {
         target: App.window.mouse
-        onCursorChanged: d.updateShown();
+        function onCursorChanged() { d.updateShown() }
     }
 
     QtObject {

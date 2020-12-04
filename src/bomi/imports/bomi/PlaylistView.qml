@@ -100,8 +100,8 @@ Item {
         }
 
         Connections {
-            target: view.model;
-            onSelectedChanged: view.selectedIndex = target.selected
+            target: view.model
+            function onSelectedChanged() { view.selectedIndex = target.selected }
         }
 
         columns: B.ItemColumn { title: "Name"; role: "name"; width: 200; id: column}

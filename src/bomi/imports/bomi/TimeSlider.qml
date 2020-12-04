@@ -119,9 +119,9 @@ Slider {
 
     Connections {
         target: d.e
-        onTick: { d.ticking = true; time = d.e.time; d.ticking = false; }
-        onEndChanged: { d.ticking = true; d.sync(); d.ticking = false; }
-        onBeginChanged: { d.ticking = true; d.sync(); d.ticking = false; }
+        function onTick() { d.ticking = true; time = d.e.time; d.ticking = false; }
+        function onEndChanged() { d.ticking = true; d.sync(); d.ticking = false; }
+        function onBeginChanged() { d.ticking = true; d.sync(); d.ticking = false; }
     }
     onValueChanged: { if (!d.ticking) d.e.seek(value); }
     Component.onCompleted: { d.sync(); d.ticking = false; }

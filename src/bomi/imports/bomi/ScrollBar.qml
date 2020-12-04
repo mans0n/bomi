@@ -58,11 +58,11 @@ Item { id: item;
         preventStealing: true
         Connections {
             target: item.target
-            onContentYChanged: {
+            function onContentYChanged() {
                 mouseArea.moving = true
                 timer.restart()
             }
-            onMovingVerticallyChanged: {
+            function onMovingVerticallyChanged() {
                 if (item.target.movingVertically) {
                     mouseArea.moving = true
                     timer.restart()

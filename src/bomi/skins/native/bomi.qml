@@ -29,7 +29,10 @@ B.AppWithDock {
         onTriggered: text.content = engine.media.name
     }
 
-    Connections { target: engine.media; onNameChanged: text.content = target.name }
+    Connections {
+        target: engine.media
+        function onNameChanged() { text.content = target.name }
+    }
 
     bottomControls: Item {
         width: parent.width; height: top.height + (fs ? 0 : bottom.height)
