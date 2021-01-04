@@ -286,9 +286,10 @@ Player::Player(QObject *parent)
 
 Player::~Player() {
     d->thread.quit();
-    if (d->thread.wait(30000))
+    if (!d->thread.wait(30000)) {
         d->thread.terminate();
-    d->thread.wait(30000);
+        d->thread.wait(30000);
+    }
     delete d;
 }
 
