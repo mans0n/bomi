@@ -411,7 +411,9 @@ void encode_lavc_finish(struct encode_lavc_context *ctx)
             avcodec_close(ctx->avc->streams[i]->codec);
             talloc_free(ctx->avc->streams[i]->codec->stats_in);
             av_free(ctx->avc->streams[i]->codec);
+#if LIBAVCODEC_VERSION_MAJOR < 58 || (LIBAVCODEC_VERION_MAJOR == 58 && LIBAVCODEC_VERION_MINOR <= 45)
             av_free(ctx->avc->streams[i]->info);
+#endif
             av_free(ctx->avc->streams[i]);
         }
 
