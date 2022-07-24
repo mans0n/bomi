@@ -48,8 +48,8 @@ public:
     auto isHovered() const -> bool;
     auto mouseX() const -> qreal;
     auto mouseY() const -> qreal;
-    Q_INVOKABLE auto contains(const QPointF &p) const -> bool { return contains(p.x(), p.y()); }
-    Q_INVOKABLE auto contains(qreal x, qreal y) const -> bool;
+    Q_INVOKABLE bool contains(const QPointF &p) const { return contains(p.x(), p.y()); }
+    Q_INVOKABLE bool contains(qreal x, qreal y) const;
 signals:
     void pressed(MouseEventObject *mouse);
     void released(MouseEventObject *mouse);

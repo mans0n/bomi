@@ -27,7 +27,7 @@ QMAKE_CXXFLAGS -= -g
 CONFIG -= debug
 CONFIG += release
 } else {
-QMAKE_CXXFLAGS += -Wno-non-template-friend
+QMAKE_CXXFLAGS += -Wno-non-template-friend -fpermissive
 }
 
 !isEmpty(USE_CCACHE): QMAKE_CXX = ccache $${QMAKE_CXX}
